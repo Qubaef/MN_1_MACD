@@ -40,20 +40,22 @@ end = dt.date(2020, 2, 1)
 start = end - dt.timedelta(days = day_diff)
 
 foldername = 'data'
-column = 'Open'
-symbol = 'AAPL'
+column = 'Adj Close'
+symbol = 'INTC'
 filename = symbol + '.csv'
 data_source = 'yahoo'       # get stock data from 'Yahoo! Finance' acording to pandas_datareader docs
 
 data = src.data.DataReader(symbol, data_source, start, end)[column]
 data.to_csv(foldername + '/' + filename)
-df = pd.read_csv(foldername + '/' + filename, header = 0, index_col = 'Date' , parse_dates = True)
+df = pd.read_csv(foldername + '/' + filename, header = 0, index_col = 'Date' , parse_dates = True).tail(1000)
 
 macd = macd_generate(df[column])
 
-plt.plot(df[column], 'b')
-plt.show()
+original = []
+for i in range(0, len(df[column])):
+    original.append(df[column][i])
 
+plt.plot(original, 'b')
 plt.plot(macd, 'b')
 plt.plot(signal_generate(macd), 'r')
 plt.show()
