@@ -36,29 +36,45 @@ def signal_generate(macd):
     return ema_generate(macd, 9)
 
 
-day_diff = 2000             # get 1000 units
+day_diff = 2000             # get data from 2000 days
 end = dt.date(2020, 2, 1)
 start = end - dt.timedelta(days = day_diff)
 
+length = 1000               # number of rows taken from downloaded data
 foldername = 'data'
-column = 'Adj Close'
-symbol = 'INTC'
+column = 'Open'             # name of the column, from which data is imported
+symbol = 'INTC'             # symbol of company whose data is downloaded
 filename = symbol + '.csv'
 data_source = 'yahoo'       # get stock data from 'Yahoo! Finance' acording to pandas_datareader docs
 
 data = src.data.DataReader(symbol, data_source, start, end)[column]
 data.to_csv(foldername + '/' + filename)
-df = pd.read_csv(foldername + '/' + filename, header = 0, index_col = 'Date' , parse_dates = True).tail(1000)
+df = pd.read_csv(foldername + '/' + filename, header = 0, index_col = 'Date' , parse_dates = True).tail(length)
 
+
+#### calculate data
+# calculate macd
 macd = macd_generate(df[column])
+# calculate signal from macd
+signal = signal_generate(macd)
+# get array with 'column' data
+original = df[column].tolist()
 
-original = []
-for i in range(0, len(df[column])):
-    original.append(df[column][i])
+# calculate x axis to position figures properly
+x_axis = list(range(1,len(original) + 1))
+plt.plot(x_axis, original, 'g', label=column)
 
-original = original[26:]
+#cut x_axis to move figures to the right
+x_axis = x_axis[26:]
 
-plt.plot(original, 'g')
-plt.plot(macd, 'b')
-plt.plot(signal_generate(macd), 'r')
+plt.plot(x_axis, macd, 'b', label="MACD")
+
+#cut x_axis to move figures to the right
+x_axis = x_axis[9:]
+plt.plot(x_axis, signal, 'r', label="SIGNAL")
+
+plt.legend()
 plt.show()
+
+
+
