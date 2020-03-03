@@ -4,7 +4,7 @@ import pandas as pd
 import pandas_datareader as src
 
 def ema_generate(data, n):
-    a = 2/(n + 1)
+    a = 1 - 2/(n + 1)
     ema = []
 
     # loop through rows, starting from n'th row
@@ -12,8 +12,8 @@ def ema_generate(data, n):
         numerator = 0
         denominator = 0
         for j in range(i, i - n - 1, -1):
-            numerator += data[j] * a ** (i - j)
-            denominator += a ** (i - j)
+            numerator += data[j] * (a ** (i - j))
+            denominator += (a ** (i - j))
         ema.append(numerator/denominator)
     return ema
 
@@ -24,8 +24,9 @@ def macd_generate(data):
     ema26 = ema_generate(data, 26)
 
     # macd = ema12 - ema26
+    ema12 = ema12[14:]
     for i in range(0, len(ema26)):
-        macd.append(ema12[i + 14] - ema26[i])
+        macd.append(ema12[i] - ema26[i])
 
     return macd
 
@@ -55,7 +56,9 @@ original = []
 for i in range(0, len(df[column])):
     original.append(df[column][i])
 
-plt.plot(original, 'b')
+original = original[26:]
+
+plt.plot(original, 'g')
 plt.plot(macd, 'b')
 plt.plot(signal_generate(macd), 'r')
 plt.show()
